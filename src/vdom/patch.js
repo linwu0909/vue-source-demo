@@ -73,9 +73,22 @@ function updateChildren(el, oldChildren, newChildren) {
   let oldEndVNode = oldChildren[oldEndIndex];
   let newEndVNode = newChildren[newEndIndex];
 
+  function makeIndexByKey(children) {
+    let map = {};
+    children.forEach((child, index) => {
+      map[child.key] = index;
+    });
+    return map;
+  }
+  let map = makeIndexByKey(oldChildren);
+
   while (oldStartIndex <= oldEndIndex && newStartIndex <= newEndIndex) {
-    // 双方有一方头指针大于尾指针就停止
-    if (isSameVNode(oldStartVNode, newStartVNode)) {
+    if (!oldStartVNode) {
+      oldStartVNode = oldChildren[++oldStartIndex];
+    } else if (!oldEndVNode) {
+      oldEndVNode = oldChildren[--oldEndIndex];
+    } else if (isSameVNode(oldStartVNode, newStartVNode)) {
+      // 双方有一方头指针大于尾指针就停止
       // 头头比对
       patchVNode(oldStartVNode, newStartVNode); // 相同节点 递归比较子节点
       oldStartVNode = oldChildren[++oldStartIndex];
@@ -98,19 +111,40 @@ function updateChildren(el, oldChildren, newChildren) {
       el.insertBefore(oldStartVNode.el, oldEndVNode.el.nextSibling); // 将老的从头部移动到尾巴去
       oldStartVNode = oldChildren[++oldStartIndex];
       newEndVNode = newChildren[--newEndIndex];
+    } else {
+      // 乱序比对
+      // 根据老的列表做一个映射关系，用新的去找，找到则移动，找不到则添加，最后多余的就删除
+      let moveIndex = map[newStartVNode.key]; // 能从映射中拿到说明是要移动的索引
+      if (moveIndex !== undefined) {
+        let moveVNode = oldChildren[moveIndex]; // 找到对应的虚拟节点复用
+        el.insertBefore(moveVNode.el, oldStartVNode.el);
+        oldChildren[moveIndex] = undefined; // 表示这个节点移动走了
+        patchVNode(moveVNode, newStartVNode);
+      } else {
+        el.insertBefore(createElm(newStartVNode), oldStartVNode.el);
+      }
+      newStartVNode = newChildren[++newStartIndex];
     }
   }
+
   if (newStartIndex <= newEndIndex) {
     // 新的多了，多的就插入进去
     for (let i = newStartIndex; i <= newEndIndex; i++) {
       let childEl = createElm(newChildren[i]);
+      // 可能是向后追加，也可能是向前追加
+      let anchor = newChildren[newEndIndex + 1]
+        ? newChildren[newEndIndex + 1].el
+        : null;
+      el.insertBefore(childEl, anchor); // anchor为null会认为是appendChild=>移动或追加
     }
   }
   if (oldStartIndex <= oldEndIndex) {
     // 老的多了，需要删除多的
     for (let i = oldStartIndex; i <= oldEndIndex; i++) {
-      let childEl = oldChildren[i].el;
-      el.removeChild(childEl);
+      if (oldChildren[i]) {
+        let childEl = oldChildren[i].el;
+        el.removeChild(childEl);
+      }
     }
   }
 }
