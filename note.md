@@ -41,3 +41,29 @@ render函数会去产生虚拟节点，根据生成的虚拟节点创造真实do
 
 ### 数组为什么尽量不用index做为key
 可能会出现错误复用=>
+
+### vue源码目录结构
+benchmarks => 性能测试
+dist => 最终打包结果
+examples => 官方例子
+flow => 类型检测ts
+packages => 一些写好的包
+scripts => 打包的脚本
+src => 源码目录
+ => compiler 专门做模版编译的
+ => core 核心代码
+ => platform
+ => server 服务端渲染相关
+ => sfc 解析单文件组件
+ => shared 模块间共享属性和方法
+
+#### 打包的入口
+src/platforms/web/entry-runtime.js
+src/platforms/web/entry-runtime-with-compiler.js => 带有compiler的会重写$mount，将template变成render函数
+
+#### 初始化做了什么
+ => initMixin(Vue) => Vue.prototype._init
+ => stateMixin(Vue) => Vue.prototype.$set Vue.prototype.$delete Vue.prototype.$watch
+ => eventsMixin(Vue) => Vue.prototype.$on Vue.prototype.$once Vue.prototype.$off Vue.prototype.$emit
+ => lifecycleMixin(Vue) => Vue.prototype._update Vue.prototype.$forceUpdate Vue.prototype.$destroy
+ => renderMixin(Vue) => Vue.prototype.$nextTick Vue.prototype._render

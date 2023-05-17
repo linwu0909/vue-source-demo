@@ -19,15 +19,23 @@ export function LifeCycleMixin(Vue) {
   Vue.prototype._render = function () {
     const vm = this;
     const render = vm.$options.render;
-    let vnode = render.call(vm);
-    return vnode;
+    let vNode = render.call(vm);
+    return vNode;
   };
   // 虚拟节点变成真实节点
-  Vue.prototype._update = function (vnode) {
-    // 将vnode渲染到el元素中
+  Vue.prototype._update = function (vNode) {
+    // 将vNode渲染到el元素中
     const vm = this;
-    // 初始化渲染+后续更新
-    vm.$el = patch(cm.$el, vnode);
+    const el = vm.$el;
+
+    const preVNode = vm._vNode;
+    vm._vNode = vNode; // 将第一次产生的虚拟节点保存到_vNode上
+    if (preVNode) {
+      // 之前渲染过了
+      vm.$el = patch(preVNode, vNode);
+    } else {
+      vm.$el = patch(el, vNode);
+    }
   };
 }
 

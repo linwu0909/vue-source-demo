@@ -1,6 +1,10 @@
 import { isSameVNode } from "./index";
 
 export function patch(oldVNode, vNode) {
+  if (!oldVNode) {
+    return createElm(vNode); // vm.$el对应的就是组件渲染的结果了
+  }
+
   // oldVNode可能是后续做虚拟节点的时候 两个虚拟节点的比较
   const isRealElement = oldVNode.nodeType;
   if (isRealElement) {
@@ -149,9 +153,24 @@ function updateChildren(el, oldChildren, newChildren) {
   }
 }
 
+function createComponent(vNode) {
+  let i = vNode.data;
+  if ((i = i.hook) && (i = i.init)) {
+    i(vNode); // 初始化组件 找到init方法
+  }
+  if (vNode.componentInstance) {
+    return true; // 说明是组件
+  }
+}
+
 export function createElm(vNode) {
   let { tag, data, children, text } = vNode;
   if (typeof tag === "string") {
+    // 创建真实元素 也要区分组件还是元素
+    if (createComponent(vNode)) {
+      return vNode.componentInstance.$el;
+    }
+
     // 元素
     vNode.el = document.createElement(tag); // diff算法 拿虚拟节点比对后更新dom
     patchProps(vNode.el, data);

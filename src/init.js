@@ -24,15 +24,20 @@ export default function initMixin(Vue) {
     // 先判断是否有render函数，没有判断是否有template，没有最后用outerHtml作为template
     // 然后把template转成render
     if (!options.render) {
-      let template = options.template;
-      if (!template) {
+      let template;
+      if (!options.template && el) {
         template = el.outerHTML;
+      } else {
+        template = options.template;
       }
-
-      const render = compilerToFunction(template);
-      options.render = render;
+      // 写了template就用写的template
+      if (template) {
+        // 有模版就挂载，需要对模版进行编译
+        const render = compilerToFunction(template);
+        options.render = render; //jsx会被编译成h('xxx')
+      }
     }
-    mountComponent(vm, el);
+    mountComponent(vm, el); // 组件挂载
   };
 }
 
