@@ -67,3 +67,11 @@ src/platforms/web/entry-runtime-with-compiler.js => 带有compiler的会重写$m
  => eventsMixin(Vue) => Vue.prototype.$on Vue.prototype.$once Vue.prototype.$off Vue.prototype.$emit
  => lifecycleMixin(Vue) => Vue.prototype._update Vue.prototype.$forceUpdate Vue.prototype.$destroy
  => renderMixin(Vue) => Vue.prototype.$nextTick Vue.prototype._render
+
+#### 初始化顺序
+initLifecycle(vm) => 初始化$parent $children
+initEvents(vm) => 初始化$on $off $emit
+initRender(vm) => 
+initInjections(vm) => inject
+initState(vm) => 响应式数据处理
+initProvide(vm) => provide
