@@ -52,9 +52,9 @@ scripts => 打包的脚本
 src => 源码目录
  => compiler 专门做模版编译的
  => core 核心代码
- => platform
+ => platform 包含2个入口，一个是运行在web上，一个运行在weex上
  => server 服务端渲染相关
- => sfc 解析单文件组件
+ => sfc 解析单文件组件=>将.vue文件解析成一个javascript对象
  => shared 模块间共享属性和方法
 
 #### 打包的入口
