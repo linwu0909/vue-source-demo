@@ -150,6 +150,10 @@ runtime + compiler 会在客户端进行编译，在运行时做的，会对性�
 #### 为什么直接操作dom性能损耗大
 dom元素本身挂了很多属性，打印出来就可以看到
 
+### 怎么理解组件化
+就是把一个页面拆分成多个组件，这样提高了复用性
+=> 组件在createElement的时候会通过createComponent创建一个组件VNode => 组件的VNode没有children 
+
 ### _render方法=>初始化渲染initRender=>src/core/instance/render.js
 用来把实例渲染成一个虚拟node，最终返回的是VNode
 initRender在定义的时候，除了vm.$createElement还有个vm._c。
@@ -166,3 +170,18 @@ vm.$createElement是用户手写的render使用，而vm._c是被模板编译成�
 
 ### 初始化Vue到最终渲染过程
 new Vue => init => $mount => compiler => render => VNode => patch => dom
+
+### options合并
+不同场景options合并不同，子组件初始化通过initInternalComponent，而外部初始化Vue用的mergeOptions
+=>initInternalComponent过程会比mergeOptions快=>只是简单的赋值，不涉及递归，合并策略等复杂逻辑
+
+### forceUpdate作用=>src/core/instance/lifecycle.js
+调用watcher的update方法，让渲染watcher对应的回调函数执行=>触发组件的重新渲染
+=>vue是通过数据驱动视图重新渲染，但是异步组件加载过程中没有数据发生变化，所以需要forceUpdate强制组件重新渲染一次
+
+### 异步组件=>异步组件实现的本质是二次渲染
+有三种创建方式
+=>普通函数异步组件
+=>promise异步组件
+=>高级异步组件=>实现了loading,resolve,reject,timeout四种状态
+=>一般都是第一次渲染生成一个注释节点，当异步获取组件成功，再通过forceRender强制渲染(高级组件有0delay的情况，这种第一次直接渲染成loading组件)
