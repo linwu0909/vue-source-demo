@@ -84,6 +84,8 @@ initProvide(vm) => provide
 ### $set作用
 通过Object.defineProperty实现的响应式对象，给对象添加一个新属性的话，是不能够触发setter的，需要通过$set去处理
 =>调用$set会调用notify()去通知watcher，这样就能让新添加的属性也被监听
+#### $set和$delete原理
+都是利用了splice()触发数据响应式
 
 ### watcher有几种类型=》4
 deep watcher => 对对象进行深度观测，deep:true

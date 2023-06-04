@@ -20,7 +20,7 @@
 
 ### 模板编译原理
 用户传递的是template，需要将template编译成render函数
-template=>ast语法树，对语法树进行标记(标记静态节点)，根据ast语法树生成render函数
+template=>ast语法树，对语法树进行标记(标记静态节点，静态节点生成dom不需要改变，提高性能)，根据ast语法树生成render函数
 => 每次渲染都可以调用render函数返回对应的虚拟节点(递归先子后父)
 
 ### 生命周期钩子怎么实现
@@ -139,6 +139,9 @@ keyup
 runtime only 需要借助如webpack的vue-loader将.vue文件编译成js=》是在编译阶段做的，只包含运行时的js代码，体积更轻量
 runtime + compiler 会在客户端进行编译，在运行时做的，会对性能有影响
 => 一般用runtime only
+#### rollup参数
+web-runtime: 运行时(无法解析传入的template，通常使用这个，通过vue-loader可以将模板转成render函数)
+web-full: 运行时+模版编译=>本地dev调试
 
 ### 为什么可以new Vue
 因为实际上vue就是一个用function实现的类
@@ -185,3 +188,7 @@ new Vue => init => $mount => compiler => render => VNode => patch => dom
 =>promise异步组件
 =>高级异步组件=>实现了loading,resolve,reject,timeout四种状态
 =>一般都是第一次渲染生成一个注释节点，当异步获取组件成功，再通过forceRender强制渲染(高级组件有0delay的情况，这种第一次直接渲染成loading组件)
+
+### 规范化prop => normalizeProps
+props有两种定义方式:对象和字符串数组=>通过normalizeProps函数统一成对象形式
+=>还有规范化inject(normalizeInject)，规范化directives(normalizeInject)
